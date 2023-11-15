@@ -27,7 +27,7 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       {
         functionName: `${service}-${stage}-create-user-table-lambda`,
         runtime: lambda.Runtime.NODEJS_18_X,
-        handler: "CreateTable.handler",
+        handler: "CreateUsersTable.handler",
         code: lambda.Code.fromAsset("lambda"),
         environment: {
           DATABASE_URL:

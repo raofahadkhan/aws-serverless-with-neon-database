@@ -7,7 +7,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
 
   try {
     await client.query(`
-          CREATE TABLE users (
+          CREATE TABLE USERS (
             id SERIAL PRIMARY KEY,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
