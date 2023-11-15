@@ -6,7 +6,15 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
   client.connect();
 
   try {
-    const res = await client.query("CREATE TABLE IF NOT EXIST USERS");
+    await client.query(`
+          CREATE TABLE users (
+            id SERIAL PRIMARY KEY,
+            first_name VARCHAR(255) NOT NULL,
+            last_name VARCHAR(255) NOT NULL,
+            age INT,
+            isStudent BOOLEAN
+        );
+    `);
 
     return {
       statusCode: 200,
