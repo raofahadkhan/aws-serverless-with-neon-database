@@ -90,5 +90,9 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       methods: [apigwv2.HttpMethod.POST],
       integration: getUsersLambdaIntegration,
     });
+
+    new cdk.CfnOutput(this, `${service}-${stage}-user-api-url`, {
+      value: crudUserApi.url!,
+    });
   }
 }
