@@ -8,19 +8,36 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const createTableLambda = new lambda.Function(this, `create-table-user-into-neon-lambda`, {
-      functionName: `create-table-user-into-neon-lambda`,
-      runtime: lambda.Runtime.NODEJS_18_X,
-      handler: "CreateTable.handler",
-      code: lambda.Code.fromAsset("lambda"),
-      environment: {
-        DATABASE_URL:
-          "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
+    const { service, stage } = props?.tags!;
+
+    const crudUserApi = new apigwv2.HttpApi(this, `${service}-${stage}-users-api`, {
+      apiName: `${service}-${stage}`,
+      description: "This api is responsible for crud operation of users table",
+      corsPreflight: {
+        allowHeaders: ["Content-Type"],
+        allowMethods: [apigwv2.CorsHttpMethod.POST],
+        allowCredentials: false,
+        allowOrigins: ["*"],
       },
     });
 
-    const createUserLambda = new lambda.Function(this, `create-user-lambda`, {
-      functionName: `create-user-lambda`,
+    const createTableLambda = new lambda.Function(
+      this,
+      `${service}-${stage}-create-user-table-lambda`,
+      {
+        functionName: `${service}-${stage}-create-user-table-lambda`,
+        runtime: lambda.Runtime.NODEJS_18_X,
+        handler: "CreateTable.handler",
+        code: lambda.Code.fromAsset("lambda"),
+        environment: {
+          DATABASE_URL:
+            "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
+        },
+      }
+    );
+
+    const createUserLambda = new lambda.Function(this, `${service}-${stage}-create-user-lambda`, {
+      functionName: `${service}-${stage}-create-user-lambda`,
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "CreateUser.handler",
       code: lambda.Code.fromAsset("lambda"),
@@ -30,8 +47,8 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       },
     });
 
-    const getUsersLambda = new lambda.Function(this, `get-users-lambda`, {
-      functionName: `get-users-lambda`,
+    const getUsersLambda = new lambda.Function(this, `${service}-${stage}-get-users-lambda`, {
+      functionName: `${service}-${stage}-get-users-lambda`,
       runtime: lambda.Runtime.NODEJS_18_X,
       handler: "GetUsers.handler",
       code: lambda.Code.fromAsset("lambda"),
