@@ -72,5 +72,23 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       `${service}-${stage}-get-users-lambda-integration`,
       createTableLambda
     );
+
+    crudUserApi.addRoutes({
+      path: "/create-table",
+      methods: [apigwv2.HttpMethod.POST],
+      integration: createTableLambdaIntegration,
+    });
+
+    crudUserApi.addRoutes({
+      path: "/create-user",
+      methods: [apigwv2.HttpMethod.POST],
+      integration: createUserLambdaIntegration,
+    });
+
+    crudUserApi.addRoutes({
+      path: "/get-users",
+      methods: [apigwv2.HttpMethod.POST],
+      integration: getUsersLambdaIntegration,
+    });
   }
 }
