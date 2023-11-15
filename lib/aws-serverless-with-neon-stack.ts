@@ -70,7 +70,7 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
 
     const getUsersLambdaIntegration = new apigwv2_integrations.HttpLambdaIntegration(
       `${service}-${stage}-get-users-lambda-integration`,
-      createTableLambda
+      getUsersLambda
     );
 
     crudUserApi.addRoutes({
