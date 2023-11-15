@@ -57,5 +57,20 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
           "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
       },
     });
+
+    const createTableLambdaIntegration = new apigwv2_integrations.HttpLambdaIntegration(
+      `${service}-${stage}-create-user-table-lambda-integration`,
+      createTableLambda
+    );
+
+    const createUserLambdaIntegration = new apigwv2_integrations.HttpLambdaIntegration(
+      `${service}-${stage}-create-user-lambda-integration`,
+      createUserLambda
+    );
+
+    const getUsersLambdaIntegration = new apigwv2_integrations.HttpLambdaIntegration(
+      `${service}-${stage}-get-users-lambda-integration`,
+      createTableLambda
+    );
   }
 }
