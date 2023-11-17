@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import { Construct } from "constructs";
 import * as apigwv2 from "@aws-cdk/aws-apigatewayv2-alpha";
 import * as apigwv2_integrations from "@aws-cdk/aws-apigatewayv2-integrations-alpha";
+import * as authorizers from "@aws-cdk/aws-apigatewayv2-authorizers-alpha";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 
 export class AwsServerlessWithNeonStack extends cdk.Stack {
@@ -20,6 +21,21 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
         allowOrigins: ["*"],
       },
     });
+
+    const createTableLambdaAuthorizer = new lambda.Function(
+      this,
+      `${service}-${stage}-create-user-table-lambda`,
+      {
+        functionName: `${service}-${stage}-create-user-table-lambda`,
+        runtime: lambda.Runtime.NODEJS_18_X,
+        handler: "CreateUsersTable.handler",
+        code: lambda.Code.fromAsset("lambda"),
+        environment: {
+          DATABASE_URL:
+            "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
+        },
+      }
+    );
 
     const createTableLambda = new lambda.Function(
       this,
@@ -58,6 +74,12 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       },
     });
 
+    const lambdaAuthorizer = new authorizers.HttpLambdaAuthorizer(
+      `${service}-${stage}-lambda-authorizer`,
+      createTableLambdaAuthorizer,
+      { responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE] }
+    );
+
     const createTableLambdaIntegration = new apigwv2_integrations.HttpLambdaIntegration(
       `${service}-${stage}-create-user-table-lambda-integration`,
       createTableLambda
@@ -77,6 +99,7 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       path: "/create-table",
       methods: [apigwv2.HttpMethod.POST],
       integration: createTableLambdaIntegration,
+      authorizer: lambdaAuthorizer,
     });
 
     crudUserApi.addRoutes({
