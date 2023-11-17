@@ -11,6 +11,10 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
 
     const { service, stage } = props?.tags!;
 
+    // =========================================
+    // Create http api for crud Operations
+    // =========================================
+
     const crudUserApi = new apigwv2.HttpApi(this, `${service}-${stage}-users-api`, {
       apiName: `${service}-${stage}`,
       description: "This api is responsible for crud operation of users table",
@@ -22,20 +26,24 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       },
     });
 
+    // ==========================================================
+    // Created Lambda Authorizer Function For Create Table Lambda
+    // ==========================================================
+
     const createTableLambdaAuthorizer = new lambda.Function(
       this,
-      `${service}-${stage}-create-user-table-lambda`,
+      `${service}-${stage}-create-table-lambda-authorizer`,
       {
-        functionName: `${service}-${stage}-create-user-table-lambda`,
+        functionName: `${service}-${stage}-create-table-lambda-authorizer`,
         runtime: lambda.Runtime.NODEJS_18_X,
-        handler: "CreateUsersTable.handler",
+        handler: "LambdaAuthorizer.handler",
         code: lambda.Code.fromAsset("lambda"),
-        environment: {
-          DATABASE_URL:
-            "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
-        },
       }
     );
+
+    // ========================================================
+    // Created Lambda Functions for Crud Operations
+    // ========================================================
 
     const createTableLambda = new lambda.Function(
       this,
@@ -46,8 +54,7 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
         handler: "CreateUsersTable.handler",
         code: lambda.Code.fromAsset("lambda"),
         environment: {
-          DATABASE_URL:
-            "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
+          DATABASE_URL: "your-database-url",
         },
       }
     );
@@ -58,8 +65,7 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       handler: "CreateUser.handler",
       code: lambda.Code.fromAsset("lambda"),
       environment: {
-        DATABASE_URL:
-          "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
+        DATABASE_URL: "your-database-url",
       },
     });
 
@@ -69,16 +75,22 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       handler: "GetUsers.handler",
       code: lambda.Code.fromAsset("lambda"),
       environment: {
-        DATABASE_URL:
-          "postgresql://raofahadkhan:LQ8rFzmvusw2@ep-empty-cell-32655077.us-east-1.aws.neon.tech/usersdb?sslmode=require",
+        DATABASE_URL: "your-database-url",
       },
     });
+
+    // =================================================
+    // Created Lambda Authorizer for Create Table Lambda
+    // =================================================
 
     const lambdaAuthorizer = new authorizers.HttpLambdaAuthorizer(
       `${service}-${stage}-lambda-authorizer`,
       createTableLambdaAuthorizer,
       { responseTypes: [authorizers.HttpLambdaResponseType.SIMPLE] }
     );
+    // ===========================================================
+    // Created Lambda Function Integrations With Api Gateway Alpha
+    // ===========================================================
 
     const createTableLambdaIntegration = new apigwv2_integrations.HttpLambdaIntegration(
       `${service}-${stage}-create-user-table-lambda-integration`,
@@ -94,6 +106,9 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       `${service}-${stage}-get-users-lambda-integration`,
       getUsersLambda
     );
+    // ==================================================================
+    // Created Routes For Lambda Funtions By Which they will be Triggered
+    // ==================================================================
 
     crudUserApi.addRoutes({
       path: "/create-table",
@@ -113,6 +128,10 @@ export class AwsServerlessWithNeonStack extends cdk.Stack {
       methods: [apigwv2.HttpMethod.POST],
       integration: getUsersLambdaIntegration,
     });
+
+    // =============================================================
+    // Output Statement for Printing the Api Gateway Url On Terminal
+    // =============================================================
 
     new cdk.CfnOutput(this, `${service}-${stage}-user-api-url`, {
       value: crudUserApi.url!,
