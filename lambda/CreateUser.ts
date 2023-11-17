@@ -15,7 +15,7 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
 
   try {
     await client.query(
-      `INSERT INTO USERS (first_name, last_name, age, isStudent) VALUES (${first_name}, ${last_name}, ${age}, ${isStudent});`
+      `INSERT INTO USERS (first_name, last_name, age, isStudent) VALUES (${convertToSingleQuotes(first_name)}, ${convertToSingleQuotes(last_name)}, ${age}, ${isStudent});`
     );
     // await client.query(`INSERT INTO USERS (first_name, last_name, age, isStudent) VALUES ("Rao Fahad","Khan",24,true);`);
 
@@ -29,4 +29,8 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
       body: JSON.stringify({ message: error }),
     };
   }
+};
+
+const convertToSingleQuotes = (doubleQuotedString: string) => {
+  return doubleQuotedString.replace(/"/g, "'");
 };
