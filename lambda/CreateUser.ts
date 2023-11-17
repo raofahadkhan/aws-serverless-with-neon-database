@@ -15,9 +15,9 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
 
   try {
     await client.query(
-      `INSERT INTO USERS (first_name, last_name, age, isStudent) VALUES (${convertToSingleQuotes(first_name)}, ${convertToSingleQuotes(last_name)}, ${age}, ${isStudent});`
+      `INSERT INTO USERS (first_name, last_name, age, isStudent) VALUES ($1, $2, $3, $4);`,
+      [first_name, last_name, age, isStudent]
     );
-    // await client.query(`INSERT INTO USERS (first_name, last_name, age, isStudent) VALUES ("Rao Fahad","Khan",24,true);`);
 
     return {
       statusCode: 200,
@@ -31,6 +31,3 @@ export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGateway
   }
 };
 
-const convertToSingleQuotes = (doubleQuotedString: string) => {
-  return doubleQuotedString.replace(/"/g, "'");
-};
